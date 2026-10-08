@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Perfect Pizza Point – Premium POS, Billing, and Customer Loyalty Portal" />
+  <title>Perfect Pizza Point 🍕 POS & Loyalty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="print/printer.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-shape bg-shape-1"></div>
+<div class="bg-shape bg-shape-2"></div>
+<div class="bg-shape bg-shape-3"></div>
+
+<!-- ═══════ NAVBAR ═══════ -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__container">
+    <div class="navbar__brand">
+      <div class="brand-icon">🍕</div>
+      <span class="brand-text">Perfect Pizza Point</span>
+    </div>
+    
+    <div class="navbar__actions">
+      <button class="printer-btn" id="btnConnectPrinter" onclick="PrinterManager.openPrinterModal()" title="Bluetooth Thermal Printer">
+        <span class="printer-indicator disconnected" id="printerIndicator"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span class="printer-btn-label" id="printerBtnLabel">Printer</span>
+      </button>
+      <button class="cache-btn cache-btn--sync" id="btnCacheSync" onclick="syncSheetCache()" title="Sync cached data">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      </button>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════ BOTTOM NAV DOCK ═══════ -->
+<div class="nav-dock" id="navDock">
+  <div class="nav-dock__indicator" id="navIndicator"></div>
+
+  <button class="nav-btn" id="navDashboard" onclick="showSection('dashboard')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span class="nav-text">Dashboard</span>
+  </button>
+  <button class="nav-btn active" id="navPos" onclick="showSection('pos')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    <span class="nav-text">POS</span>
+  </button>
+  <button class="nav-btn" id="navAllEntries" onclick="showSection('allEntries')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <span class="nav-text">Entries</span>
+  </button>
+  <button class="nav-btn" id="navAdmin" onclick="showSection('admin')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+    <span class="nav-text">Admin</span>
+  </button>
+</div>
+
+<!-- ═══════ TOAST CONTAINER ═══════ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<main class="main-content">
+  <!-- ═══════ HOME / ENTRY SECTION ═══════ -->
+
+
+  <!-- ═══════ POS SECTION ═══════ -->
+  <section class="page-section wide active" id="sectionPos">
+    
+    <!-- Tables View -->
+    <div id="posTablesView" class="fade-in">
+      <div class="hero-header flex-between mb-3">
+        <h2 class="hero-title">Select <span class="text-gradient">Table</span></h2>
+      </div>
+      <div class="pos-tables-grid" id="posTablesGrid"></div>
+    </div>
+
+    <!-- Categories View -->
+    <div id="posCategoriesView" class="hidden fade-in">
+      <div class="hero-header flex-between mb-3">
+        <h2 class="hero-title">Menu <span class="text-gradient">Categories</span></h2>
+        <button class="btn btn--outline" onclick="showPosTables()">Back to Tables</button>
+      </div>
+      <div class="pos-categories-grid" id="posCategoriesGrid"></div>
+      
+      <div class="pos-action-bar mt-4 flex-row" style="justify-content: center; gap: 1rem;">
+        <button class="btn btn--generate-bill btn--lg pulse-hover" onclick="generateBill()">
+          <span class="btn-icon">🧾</span> Generate Bill
+        </button>
+      </div>
+    </div>
+
+    <!-- Dishes View -->
+    <div id="posDishesView" class="hidden fade-in">
+      <div class="hero-header flex-between mb-3">
+        <h2 class="hero-title">Select <span class="text-gradient">Dishes</span></h2>
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn--outline" onclick="showPosCategories()">Back to Categories</button>
+          <button class="btn btn--outline" onclick="showPosTables()">Back to Tables</button>
+        </div>
+      </div>
+      <div class="pos-dishes-grid" id="posDishesGrid"></div>
+      
+      <div class="pos-action-bar mt-4 flex-row" style="justify-content: center; gap: 1rem;">
+        <button class="btn btn--generate-bill btn--lg pulse-hover" onclick="generateBill()">
+          <span class="btn-icon">🧾</span> Generate Bill
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════ ALL ENTRIES SECTION ═══════ -->
+  <section class="page-section wide" id="sectionAllEntries">
+    <!-- Filters & Stats Container -->
+    <div class="entries-dashboard mb-3">
+      <!-- Mini Stats Row -->
+      <div class="tbv-stats-mini mb-3" id="entriesStatsMini" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+        <div class="stat-card">
+          <div class="stat-card__value" id="entriesTotalSales">₹0</div>
+          <div class="stat-card__label">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="entriesTotalCount">0</div>
+          <div class="stat-card__label">Transactions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="entriesAvgValue">₹0</div>
+          <div class="stat-card__label">Avg Bill Value</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value" id="entriesPaymentBreakdown">0 / 0 / 0</div>
+          <div class="stat-card__label">Cash / UPI / Card</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main List & Controls Card -->
+    <div class="card card-white fade-in" style="padding: 1.25rem;">
+      <!-- Controls Row (Merged inside Card) -->
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-input); padding-bottom: 1rem;">
+        <!-- Left: Search input -->
+        <div style="flex: 1; min-width: 200px; position: relative;">
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem; pointer-events: none;">🔍</span>
+          <input class="form-input" id="entriesSearchInput" type="text" placeholder="Search by mobile..." oninput="filterEntries()" style="padding-left: 36px; width: 100%; font-size: 0.9rem;" />
+        </div>
+        <!-- Right: Filters -->
+        <div class="entries-filters-controls">
+          <input class="form-input" id="entriesDateFilter" type="date" onchange="filterEntries()" style="padding: 0.45rem 0.65rem; font-size: 0.85rem;" />
+          <select class="form-input" id="entriesPaymentFilter" onchange="filterEntries()" style="padding: 0.45rem 0.65rem; font-size: 0.85rem; cursor: pointer; height: auto;">
+            <option value="all">All Payments</option>
+            <option value="cash">Cash Only</option>
+            <option value="upi">UPI Only</option>
+            <option value="card">Card Only</option>
+          </select>
+          <button class="btn btn--outline btn--sm" onclick="resetEntriesFilters()" style="padding: 0.45rem 0.85rem; font-size: 0.85rem;">Reset</button>
+        </div>
+      </div>
+
+      <!-- Desktop View (Table) -->
+      <div class="hide-on-mobile">
+        <div class="glass-table-wrap" style="max-height: 550px; overflow-y: auto;">
+          <table class="entry-table">
+            <thead>
+              <tr>
+                <th>Mobile Number</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Amount</th>
+                <th>Payment Modes</th>
+                <th>Ordered Items</th>
+                <th style="text-align: center;">Visit #</th>
+                <th style="text-align: center; width: 110px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="allEntriesTableBody">
+              <!-- Entries injected here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile View (Card List) -->
+      <div class="show-on-mobile" id="allEntriesMobileList">
+        <!-- Injected here -->
+      </div>
+
+      <!-- Load More Button -->
+      <div id="entriesLoadMoreContainer" style="text-align: center; margin-top: 1.5rem; display: none;">
+        <button class="btn btn--outline" id="btnEntriesLoadMore" onclick="loadMoreEntries()" style="min-width: 180px;">Load More</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ ADMIN SECTION ═══════ -->
+  <section class="page-section wide" id="sectionAdmin">
+    
+    <!-- Login Gate -->
+    <div id="adminLoginWrap" class="fade-in">
+      <div class="login-card">
+        <div class="login-badge-container">
+          <div class="login-badge-circle">🔐</div>
+        </div>
+        <h2 class="login-title-text">Admin Workspace</h2>
+        <p class="login-subtitle-text">Enter credentials to access POS controls</p>
+        
+        <div class="form-group">
+          <label class="form-label" for="adminUser">Username</label>
+          <div class="login-input-wrapper">
+            <input class="form-input" id="adminUser" type="text" placeholder="Enter username" />
+            <span class="login-input-icon">👤</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="adminPass">Password</label>
+          <div class="login-input-wrapper">
+            <input class="form-input" id="adminPass" type="password" placeholder="Enter password" />
+            <span class="login-input-icon">🔑</span>
+          </div>
+        </div>
+        
+        <div class="error-msg" id="errLogin">
+          <span>⚠️</span> Invalid credentials. Please try again.
+        </div>
+        
+        <button class="btn btn--primary btn--block btn--lg mt-3" id="btnLogin" onclick="handleAdminLogin()">
+          Login to Dashboard
+        </button>
+      </div>
+    </div>
+
+    <!-- POS Admin Management -->
+    <div class="hidden fade-in" id="adminPOSPanel">
+      <div class="dashboard-header mt-4">
+        <h2 class="dashboard-title">POS Management</h2>
+      </div>
+
+      <div class="admin-dashboard-container">
+        
+        <!-- Left Sidebar Navigation -->
+        <aside class="admin-sidebar">
+          <nav class="admin-sidebar-nav">
+            <button class="admin-nav-item active" onclick="switchAdminTab('adminTabMenu', this)">
+              <span class="nav-icon">📋</span>
+              <span class="nav-text">Menu Setup</span>
+            </button>
+            <button class="admin-nav-item" onclick="switchAdminTab('adminTabLoyalty', this)">
+              <span class="nav-icon">🎁</span>
+              <span class="nav-text">Loyalty Rewards</span>
+            </button>
+            <button class="admin-nav-item" onclick="switchAdminTab('adminTabAppearance', this)">
+              <span class="nav-icon">🎨</span>
+              <span class="nav-text">POS Theme</span>
+            </button>
+            <button class="admin-nav-item" onclick="switchAdminTab('adminTabSecurity', this)">
+              <span class="nav-icon">🔐</span>
+              <span class="nav-text">Security Config</span>
+            </button>
+          </nav>
+        </aside>
+
+        <!-- Right Content Area containing the tab panels -->
+        <main class="admin-content-area">
+
+          <!-- Tab 1: Menu Setup -->
+          <div class="admin-tab-panel active" id="adminTabMenu">
+            <!-- Table Layout Sections -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">🪑 Table Layout & Sections</div>
+              </div>
+              <div class="form-group form-row-responsive mb-3">
+                <input class="form-input" id="adminTableCategoryName" type="text" placeholder="Section Name (e.g. AC Section)" style="flex-grow: 1;" />
+                <input class="form-input" id="adminTableCategoryCount" type="number" min="1" placeholder="Table Count" style="max-width: 150px;" />
+                <button class="btn btn--primary" onclick="addAdminTableCategory()">Add Section</button>
+              </div>
+              <div class="table-responsive glass-table-wrap">
+                <table class="glass-table">
+                  <thead>
+                    <tr>
+                      <th>Section Name</th>
+                      <th>Number of Tables</th>
+                      <th style="width: 150px; text-align: center;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminTableCategoriesTable">
+                    <!-- Loaded dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">📂 Categories</div>
+              </div>
+              <div class="form-group form-row-responsive mb-3">
+                <input class="form-input" id="adminCategoryName" type="text" placeholder="New Category Name" />
+                <button class="btn btn--primary" onclick="addAdminCategory()">Add Category</button>
+              </div>
+              <div class="table-responsive glass-table-wrap">
+                <table class="entry-table">
+                  <thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead>
+                  <tbody id="adminCategoriesTable"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Dishes -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">🍕 Dishes</div>
+              </div>
+              <div class="form-group mb-2">
+                <label class="form-label">Select Category</label>
+                <select class="form-input" id="adminDishCategorySelect" onchange="loadAdminDishes()"></select>
+              </div>
+              <div class="form-group form-row-responsive mb-3">
+                <input class="form-input" id="adminDishName" type="text" placeholder="Dish Name" />
+                <input class="form-input" id="adminDishAmount" type="number" placeholder="Price (₹)" style="max-width: 150px;" />
+                <button class="btn btn--primary" onclick="addAdminDish()">Add Dish</button>
+              </div>
+              <div class="table-responsive glass-table-wrap">
+                <table class="entry-table">
+                  <thead><tr><th>Name</th><th>Price</th><th>Actions</th></tr></thead>
+                  <tbody id="adminDishesTable"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Dish Flavours -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">🧂 Dish Types / Flavours</div>
+              </div>
+              <div class="form-group mb-2">
+                <label class="form-label">Select Category</label>
+                <select class="form-input" id="adminFlavourCategorySelect" onchange="loadAdminFlavourDishes()"></select>
+              </div>
+              <div class="form-group mb-2">
+                <label class="form-label">Select Dish</label>
+                <select class="form-input" id="adminFlavourDishSelect" onchange="loadAdminFlavours()"></select>
+              </div>
+              <div class="form-group form-row-responsive mb-3">
+                <input class="form-input" id="adminFlavourName" type="text" placeholder="Flavour / Type Name" />
+                <button class="btn btn--primary" onclick="addAdminFlavour()">Add Flavour</button>
+              </div>
+              <div class="table-responsive glass-table-wrap">
+                <table class="entry-table">
+                  <thead><tr><th>Flavour Name</th><th>Actions</th></tr></thead>
+                  <tbody id="adminFlavoursTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Loyalty Rewards -->
+          <div class="admin-tab-panel" id="adminTabLoyalty">
+            <!-- System Settings -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">⚙️ System Settings</div>
+              </div>
+              <div class="admin-setting-row">
+                <div class="admin-setting-info">
+                  <span class="admin-setting-label">🎁 Reward System</span>
+                  <span class="admin-setting-desc">When OFF, all transactions generate bills only — no loyalty entries or rewards are recorded.</span>
+                </div>
+                <label class="reward-toggle-switch" for="adminRewardToggle">
+                  <input type="checkbox" id="adminRewardToggle" checked onchange="handleAdminToggleRewardSystem(this)" />
+                  <span class="reward-toggle-slider"></span>
+                </label>
+              </div>
+              <div class="admin-setting-status" id="rewardToggleStatus">
+                <span class="reward-status-badge reward-status-on" id="rewardStatusBadge">● Reward System is ON</span>
+              </div>
+            </div>
+
+            <!-- Loyalty Reward Settings -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">⚙️ Loyalty Reward Settings</div>
+              </div>
+              <div class="admin-setting-row" style="display: flex; flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem 1.25rem 1.5rem;">
+                <span class="admin-setting-desc" style="margin-bottom: 0.5rem;">Configure minimum amount, visit cycle, and reward valuation:</span>
+                
+                <div class="form-group mb-2">
+                  <label class="form-label" for="adminMinAmount">Minimum Bill Amount (₹)</label>
+                  <input class="form-input" id="adminMinAmount" type="number" min="0" placeholder="e.g., 100" />
+                </div>
+                <div class="form-group mb-2">
+                  <label class="form-label" for="adminCycle">Visits Cycle Length</label>
+                  <input class="form-input" id="adminCycle" type="number" min="1" placeholder="e.g., 10" />
+                </div>
+                <div class="form-group mb-2">
+                  <label class="form-label" for="adminRewardValue">Reward Valuation Amount (₹)</label>
+                  <input class="form-input" id="adminRewardValue" type="number" min="0" placeholder="e.g., 150" />
+                </div>
+                
+                <button class="btn btn--primary" id="btnUpdateRewardConfig" onclick="saveAdminRewardConfig()" style="width: 100%; margin-top: 0.5rem;">
+                  Save Configurations
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Appearance -->
+          <div class="admin-tab-panel" id="adminTabAppearance">
+            <!-- POS Theme Settings -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">🎨 POS Theme Settings</div>
+              </div>
+              <div class="admin-setting-row" style="display: flex; flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem 1.25rem 1.5rem;">
+                <span class="admin-setting-desc" style="margin-bottom: 0.5rem;">Select a premium theme color preset for the POS system:</span>
+                <div class="theme-options-grid" id="adminThemeOptionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem;">
+                  <!-- Injected dynamically via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 4: Security -->
+          <div class="admin-tab-panel" id="adminTabSecurity">
+            <!-- Admin Credentials Settings -->
+            <div class="card chart-card mb-3">
+              <div class="chart-card__header">
+                <div class="chart-card__title">🔐 Security Settings</div>
+              </div>
+              <div class="admin-setting-row" style="display: flex; flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem 1.25rem 1.5rem;">
+                <span class="admin-setting-desc" style="margin-bottom: 0.5rem;">Change admin username and password credentials:</span>
+                
+                <div class="form-group mb-2">
+                  <label class="form-label" for="newAdminUser">New Username</label>
+                  <input class="form-input" id="newAdminUser" type="text" placeholder="Enter new username" />
+                </div>
+                <div class="form-group mb-2">
+                  <label class="form-label" for="newAdminPass">New Password</label>
+                  <input class="form-input" id="newAdminPass" type="password" placeholder="Enter new password" />
+                </div>
+                <div class="form-group mb-2">
+                  <label class="form-label" for="confirmAdminPass">Confirm New Password</label>
+                  <input class="form-input" id="confirmAdminPass" type="password" placeholder="Confirm new password" />
+                </div>
+                
+                <button class="btn btn--primary" id="btnUpdateAdminCreds" onclick="saveAdminCreds()" style="width: 100%; margin-top: 0.5rem;">
+                  Save Credentials
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ DASHBOARD SECTION (PUBLIC) ═══════ -->
+  <section class="page-section wide" id="sectionDashboard">
+
+    <!-- Dashboard Loading Overlay -->
+    <div id="dashboardLoadingOverlay" class="dashboard-loading-overlay">
+      <div class="dashboard-loading-card">
+        <div class="pizza-loader">🍕</div>
+        <div class="loading-bar-container">
+          <div class="loading-bar-fill"></div>
+        </div>
+        <div class="loading-text">Assembling Analytics...</div>
+      </div>
+    </div>
+
+    <!-- ZONE A: COMMAND HEADER -->
+    <div class="dashboard-command-header" id="dashboardCommandHeader">
+      <div class="dashboard-command-header__left">
+        <h2 class="dashboard-title">Overview</h2>
+        <div class="date-badge" id="currentDateBadge"></div>
+      </div>
+      <div class="dashboard-command-header__right">
+        <div class="period-filter" id="periodFilter">
+          <button class="period-btn active" onclick="setDashboardPeriod('today', this)">Today</button>
+          <button class="period-btn" onclick="setDashboardPeriod('7d', this)">7 Days</button>
+          <button class="period-btn" onclick="setDashboardPeriod('30d', this)">30 Days</button>
+          <button class="period-btn" onclick="setDashboardPeriod('all', this)">All Time</button>
+        </div>
+        <span class="last-synced" id="lastSyncedLabel"></span>
+      </div>
+    </div>
+
+    <!-- ZONE B: KPI STRIP -->
+    <div class="kpi-strip" id="kpiStrip">
+      <!-- Cards injected by renderKpiStrip() -->
+    </div>
+
+    <!-- ZONE C + D: MAIN GRID -->
+    <div class="dashboard-grid-new">
+
+      <!-- MAIN COLUMN -->
+      <div class="dashboard-main-new">
+
+        <!-- C1: Revenue Trend -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__header flex-between">
+            <div class="chart-card__title"><span class="icon">📈</span> Revenue Trend</div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartRevenueTrend" height="200"></canvas></div>
+        </div>
+
+        <!-- C2: Payment Breakdown -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__header">
+            <div class="chart-card__title"><span class="icon">💳</span> Payment Breakdown</div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartPaymentBreakdown" height="160"></canvas></div>
+        </div>
+
+        <!-- C3: Best Sellers (side by side) -->
+        <div class="dashboard-grid-equal mb-3">
+          <div class="card chart-card">
+            <div class="chart-card__header flex-between">
+              <div class="chart-card__title"><span class="icon">📈</span> Today's Top 5</div>
+              <input type="date" id="bestSellersDateFilter" class="form-input date-mini" onchange="loadBestSellers()" />
+            </div>
+            <div id="dailyBestSellersList"></div>
+          </div>
+          <div class="card chart-card">
+            <div class="chart-card__header">
+              <div class="chart-card__title"><span class="icon">🏆</span> All-Time Top 5</div>
+            </div>
+            <div id="overallBestSellersList"></div>
+          </div>
+        </div>
+
+        <!-- C4: Month-Day Heatmap -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__header flex-between">
+            <div class="chart-card__title"><span class="icon">📅</span> Monthly Activity Heatmap</div>
+            <div class="toggle-row" id="mdHeatmapToggle">
+              <button class="toggle-btn active" onclick="setMdHeatmapType('amount', this)">Amount</button>
+            </div>
+          </div>
+          <div class="heatmap-wrapper"><div id="mdHeatmapContainer"></div></div>
+        </div>
+
+        <!-- C5: Peak Hours Map -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__header flex-between">
+            <div class="chart-card__title"><span class="icon">🔥</span> Peak Hours Map</div>
+            <div class="toggle-row" id="heatmapToggle">
+              <button class="toggle-btn active" onclick="setHeatmapType('entries', this)">Entries</button>
+            </div>
+          </div>
+          <div class="heatmap-wrapper"><div id="heatmapContainer"></div></div>
+          <div class="peak-callout" id="peakHoursCallout"></div>
+        </div>
+
+        <!-- C6: Time Between Visits -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__header">
+            <div class="chart-card__title"><span class="icon">⏱️</span> Revisit Frequency</div>
+          </div>
+          <div id="tbvContainer" class="hidden">
+            <div class="tbv-stats-mini" id="tbvStats"></div>
+            <div class="chart-wrap mt-3"><canvas id="chartTBV"></canvas></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR COLUMN -->
+      <div class="dashboard-sidebar-new">
+
+        <!-- D1: Today's Summary (HERO SIDEBAR CARD) -->
+        <div class="card chart-card today-hero-card mb-3">
+          <div class="chart-card__header flex-between">
+            <div class="chart-card__title">📅 Today</div>
+            <div class="toggle-row mini" id="todayToggle">
+              <button class="toggle-btn active" onclick="setTodayView('entries', this)">#</button>
+              <button class="toggle-btn" onclick="setTodayView('amount', this)">₹</button>
+            </div>
+          </div>
+          <div id="todayValue" class="huge-value"></div>
+          <div id="todayDelta" class="today-delta"></div>
+        </div>
+
+        <!-- D2: Payment Mix Donut -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__title mb-3">💳 Payment Mix</div>
+          <div class="chart-wrap donut-wrap"><canvas id="chartPaymentDonut"></canvas></div>
+          <div class="payment-mix-totals" id="paymentMixTotals"></div>
+        </div>
+
+        <!-- D3: Customer Base -->
+        <div class="card chart-card mb-3">
+          <div class="chart-card__title mb-3">👥 Customer Tiers</div>
+          <div class="chart-wrap donut-wrap"><canvas id="chartCustomerTiers"></canvas></div>
+          <div class="tier-pills" id="tierPills"></div>
+        </div>
+
+        <!-- D4: Top Loyalists -->
+        <div class="card chart-card">
+          <div class="chart-card__header flex-between">
+            <div class="chart-card__title">🏆 Top Loyalists</div>
+            <select class="sort-mini" id="loyalistSort" onchange="renderTopLoyalists()">
+              <option value="visits">By Visits</option>
+              <option value="rewards">By Rewards</option>
+            </select>
+          </div>
+          <ul class="top-list" id="topCustomersList"></ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ZONE E: RECENT ACTIVITY FEED -->
+    <div class="card chart-card mt-3">
+      <div class="chart-card__header flex-between">
+        <div class="chart-card__title"><span class="icon">🕐</span> Recent Transactions</div>
+        <button class="btn btn--ghost btn--sm" onclick="showSection('allEntries')">View All →</button>
+      </div>
+      <div id="recentActivityFeed" class="activity-feed"></div>
+    </div>
+
+  </section>
+</main>
+
+<!-- ═══════ CUSTOMER DETAILS MODAL ═══════ -->
+<div class="modal-overlay" id="modalDetails">
+  <div class="modal glass-modal">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">👤</span> Customer Profile
+      </div>
+      <button class="modal__close" onclick="closeDetailsModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="modal__body">
+      <div class="profile-summary">
+        <div class="profile-number" id="profileMobileDisp">+91 XXXXX XXXXX</div>
+      </div>
+
+      <!-- Eligibility -->
+      <div id="eligibilityBanner"></div>
+
+      <div class="loyalty-progress-section">
+        <div class="section-title">Loyalty Progress</div>
+        <!-- Dots visualizer -->
+        <div class="dots-section" id="dotsContainer"></div>
+      </div>
+
+      <div class="rewards-history-section">
+        <div class="section-title flex-between">
+          <span>Rewards Claimed</span>
+          <span class="badge" id="rewardCountBadge">0</span>
+        </div>
+        <div class="reward-emojis" id="rewardEmojis"></div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Past entries (manual toggle) -->
+      <button class="btn btn--secondary btn--block" id="btnShowDetails" onclick="loadPastEntries()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        View Transaction History
+      </button>
+      
+      <div class="hidden mt-2" id="pastEntriesWrap">
+        <div class="table-responsive glass-table-wrap">
+          <table class="entry-table" id="pastEntriesTable">
+            <thead>
+              <tr><th>#</th><th>Date & Time</th><th>Amount</th><th>Message</th></tr>
+            </thead>
+            <tbody id="pastEntriesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BILL / CHECKOUT MODAL ═══════ -->
+<div class="modal-overlay" id="modalBill">
+  <div class="modal glass-modal modal-checkout-wrap">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">🛒</span> POS Checkout
+      </div>
+      <button class="modal__close" onclick="closeBillModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="modal__body checkout-split-layout">
+      
+      <!-- Left Panel: Always visible Ordered Items -->
+      <div class="checkout-left-panel">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">Order Summary</h3>
+          <div style="font-size: 0.78rem; font-weight: 700; background: var(--bg-card); border: 1px solid var(--border-input); padding: 0.2rem 0.65rem; border-radius: 20px; color: var(--brand-primary); display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap;">
+            <span>📍</span><span id="checkoutTableSection">Main</span> • <span id="checkoutTableName">Table 1</span>
+          </div>
+        </div>
+        <div class="table-responsive glass-table-wrap" style="flex: 1; overflow-y: auto; max-height: 45vh; margin-bottom: 1rem;">
+          <table class="entry-table" id="billTable">
+            <thead>
+              <tr>
+                <th style="text-align: left;">Item</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: center;">Gift (Free)</th>
+                <th style="text-align: right;">Price</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody id="billTableBody"></tbody>
+          </table>
+        </div>
+        <div class="flex-between" style="padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+          <span style="font-weight: 700; font-size: 1.1rem;">Subtotal:</span>
+          <span id="billSubtotal" style="font-weight: 700; font-size: 1.1rem;">₹0</span>
+        </div>
+      </div>
+
+      <!-- Right Panel: Wizard Steps -->
+      <div class="checkout-right-panel">
+        
+        <!-- STEP 1: Customer Identity -->
+        <div id="checkoutStep1" class="checkout-step active">
+          <h3 class="mb-3" style="text-align: center;">Step 1: Customer Identity</h3>
+          <div class="form-group mb-4">
+            <label class="form-label" for="posMobile">Customer Mobile (Optional)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">+91</span>
+              <input class="form-input with-prefix" id="posMobile" type="tel" maxlength="10" placeholder="Enter 10-digit number" oninput="this.value=this.value.replace(/\D/g,''); handlePosMobileInput()" />
+            </div>
+            <div id="posLoyaltyBadge" style="margin-top:0.5rem; font-size:0.85rem; color:var(--brand-primary); font-weight:500; height: 1.2rem;"></div>
+          </div>
+          <div class="btn-row" style="display: flex; gap: 0.75rem;">
+            <button class="btn btn--secondary" style="flex: 1;" onclick="skipMobileAndContinue()">Without Mobile</button>
+            <button class="btn btn--primary" id="btnNextStep1" style="flex: 1;" onclick="goToCheckoutStep(2)">Continue</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Bill Adjustments -->
+        <div id="checkoutStep2" class="checkout-step" style="display: none;">
+          <h3 class="mb-3" style="text-align: center;">Step 2: Adjustments</h3>
+          
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: flex-end;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label class="form-label">Tax (%)</label>
+              <input class="form-input" id="posTax" type="number" min="0" placeholder="0" oninput="calculateFinalAmount()" />
+            </div>
+            
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+              <div class="flex-between mb-2" style="align-items: center;">
+                <label class="form-label" style="margin-bottom: 0;">Discount</label>
+                <div class="toggle-row mini" style="margin-left: 0.75rem; padding: 3px; border-radius: 8px;">
+                  <button class="toggle-btn active" id="btnDiscTypeRupee" style="padding: 3px 10px; font-size: 0.8rem; font-weight: 700;" onclick="setDiscountType('rupee')">₹</button>
+                  <button class="toggle-btn" id="btnDiscTypePercent" style="padding: 3px 10px; font-size: 0.8rem; font-weight: 700;" onclick="setDiscountType('percent')">%</button>
+                </div>
+              </div>
+              <input class="form-input" id="posDiscount" type="number" min="0" placeholder="0" oninput="calculateFinalAmount()" />
+            </div>
+          </div>
+          
+          <!-- Dynamic Reward Button -->
+          <div id="rewardRedemptionContainer" class="mb-3" style="display: none;">
+            <button class="btn btn--outline" id="btnApplyReward" style="width: 100%; border-color: var(--brand-primary); color: var(--brand-primary);" onclick="applyRewardDiscount()">🎁 Apply Reward Discount (₹<span id="rewardValueSpan">0</span>)</button>
+          </div>
+
+          <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin:1rem 0;" />
+
+          <div class="flex-between mb-4" style="font-size: 1.25rem; font-weight: 800;">
+            <span>Final Amount:</span>
+            <span class="text-gradient" id="billGrandTotal">₹0</span>
+          </div>
+
+          <div class="btn-row gap-2" style="display: flex; justify-content: space-between;">
+            <button class="btn btn--secondary" onclick="goToCheckoutStep(1)">⬅ Back</button>
+            <button class="btn btn--primary" onclick="goToCheckoutStep(3)">Next ➔</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Finalization -->
+        <div id="checkoutStep3" class="checkout-step" style="display: none;">
+          <h3 class="mb-3" style="text-align: center;">Step 3: Finalize Checkout</h3>
+          
+          <div id="checkoutAlerts" class="mb-3"></div>
+
+          <div class="form-group mb-3" id="posPaymentModeGroup">
+            <label class="form-label">Payment Mode</label>
+            <div class="payment-mode-grid">
+              <label class="payment-mode-option">
+                <input type="radio" name="posPaymentMode" value="cash" checked onchange="selectPosPaymentMode('cash')">
+                <span class="payment-mode-icon">💵</span>
+                <span class="payment-mode-label">Cash</span>
+              </label>
+              <label class="payment-mode-option">
+                <input type="radio" name="posPaymentMode" value="upi" onchange="selectPosPaymentMode('upi')">
+                <span class="payment-mode-icon">📱</span>
+                <span class="payment-mode-label">UPI</span>
+              </label>
+              <label class="payment-mode-option">
+                <input type="radio" name="posPaymentMode" value="card" onchange="selectPosPaymentMode('card')">
+                <span class="payment-mode-icon">💳</span>
+                <span class="payment-mode-label">Card</span>
+              </label>
+              <label class="payment-mode-option">
+                <input type="radio" name="posPaymentMode" value="split" onchange="selectPosPaymentMode('split')">
+                <span class="payment-mode-icon">🔀</span>
+                <span class="payment-mode-label">Split</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="form-group mb-4">
+            <label class="form-label" for="posMessage">Message (Optional)</label>
+            <input class="form-input" id="posMessage" type="text" value="Thank You, Visit Again" placeholder="Add a note for this visit..." />
+          </div>
+
+          <div class="btn-row gap-2" style="display: flex; justify-content: space-between;">
+            <button class="btn btn--secondary" onclick="goToCheckoutStep(2)">⬅ Back</button>
+            <button class="btn btn--primary" id="btnPosSaveEntry" style="flex:1" onclick="finalizePosOrder()">💾 Finalize Order</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: Success & Confirmation -->
+        <div id="checkoutStep4" class="checkout-step" style="display: none; text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.25rem; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🎉</div>
+          <h3 class="mb-1" style="font-size: 1.2rem; font-weight: 800; color: var(--success);">Order Saved Successfully!</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="step4Subtitle">The order record has been stored.</p>
+          <div id="step4SyncBadge" class="step4-sync-badge syncing" style="margin-bottom: 0.75rem;">
+            <span class="step4-sync-spinner"></span>
+            <span id="step4SyncBadgeText">Saving to Cloud...</span>
+          </div>
+          <div id="step4CycleBanner" style="display: none; margin-bottom: 0.75rem;"></div>
+
+          <div style="background: var(--bg-card); border-radius: 14px; padding: 0.75rem 1rem; border: 1px solid var(--border-input); margin-bottom: 0.75rem; text-align: left;">
+            <div class="flex-between mb-1">
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Final Paid Amount</span>
+              <span style="font-size: 1.1rem; font-weight: 800; color: var(--brand-primary);" id="step4Amount">₹0</span>
+            </div>
+            <div class="flex-between mb-1">
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Payment Mode</span>
+              <span style="font-weight: 700; text-transform: uppercase; font-size: 0.8rem;" id="step4PaymentMode">CASH</span>
+            </div>
+            <div class="flex-between mb-1">
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Customer Mobile</span>
+              <span style="font-weight: 700; font-size: 0.88rem;" id="step4Mobile">None</span>
+            </div>
+            <div class="flex-between">
+              <span style="color: var(--text-muted); font-size: 0.8rem;">Table & Section</span>
+              <span style="font-weight: 700; font-size: 0.85rem;" id="step4Table">Main • Table 1</span>
+            </div>
+          </div>
+
+          <div class="btn-row gap-2" style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+            <button class="btn btn--print btn--block pulse-hover" id="btnStep4PrintInvoice" onclick="printPosInvoice()" style="padding: 0.65rem 1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              Print Bill / Invoice
+            </button>
+            <div id="posRowWhatsapp" style="display: none; width: 100%;">
+              <a class="btn btn--whatsapp btn--block pulse-hover" id="posLinkWhatsapp" href="#" target="_blank" rel="noopener" style="padding: 0.65rem 1rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                Send Receipt to WhatsApp
+              </a>
+            </div>
+            <button class="btn btn--outline btn--block" id="btnStep4ViewCustomer" style="display: none; padding: 0.65rem 1rem;" onclick="openStep4CustomerDetails()">👤 View Customer Details</button>
+            <button class="btn btn--primary btn--block" style="padding: 0.65rem 1rem;" onclick="closeBillModal()">✨ Next Order / Done</button>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SPLIT PAYMENT MODAL ═══════ -->
+<div class="modal-overlay" id="modalSplit">
+  <div class="modal glass-modal" style="max-width: 420px;">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">✂️</span> Split Payment
+      </div>
+      <button class="modal__close" onclick="closeSplitModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <div class="split-total-badge" id="splitTotalBadge">Total: ₹0</div>
+
+      <div class="form-group mb-2">
+        <label class="form-label">💵 Cash</label>
+        <input class="form-input" id="splitCash" type="number" min="0" placeholder="0" oninput="validateSplitTotal()" />
+      </div>
+      <div class="form-group mb-2">
+        <label class="form-label">📱 UPI</label>
+        <input class="form-input" id="splitUpi" type="number" min="0" placeholder="0" oninput="validateSplitTotal()" />
+      </div>
+      <div class="form-group mb-2">
+        <label class="form-label">💳 Card</label>
+        <input class="form-input" id="splitCard" type="number" min="0" placeholder="0" oninput="validateSplitTotal()" />
+      </div>
+
+      <div class="split-remaining" id="splitRemaining">Remaining: ₹0</div>
+
+      <button class="btn btn--primary btn--block btn--lg" id="btnSplitDone" onclick="confirmSplitPayment()" disabled>
+        Done
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FLAVOUR ADD MODAL ═══════ -->
+<div class="modal-overlay" id="modalFlavour">
+  <div class="modal glass-modal flavour-modal">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">✨</span> Select Flavour
+      </div>
+      <button class="modal__close" onclick="closeFlavourModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <h3 id="flavourModalDishName" style="margin-bottom: 1rem; color: var(--text-light);"></h3>
+      <div id="flavourOptionsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;">
+        <!-- Radio buttons injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ FLAVOUR REMOVE MODAL ═══════ -->
+<div class="modal-overlay" id="modalFlavourRemove">
+  <div class="modal glass-modal flavour-modal">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">➖</span> Remove Flavour
+      </div>
+      <button class="modal__close" onclick="closeFlavourRemoveModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <h3 id="flavourRemoveModalDishName" style="margin-bottom: 1rem; color: var(--text-light);"></h3>
+      <p style="margin-bottom: 1rem; font-size: 0.9rem;">Which variant would you like to reduce?</p>
+      <div id="flavourRemoveOptionsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem;">
+        <!-- Clickable options injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ EDIT DISH MODAL ═══════ -->
+<div class="modal-overlay" id="modalEditDish">
+  <div class="modal glass-modal" style="max-width: 400px;">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">✏️</span> Edit Dish
+      </div>
+      <button class="modal__close" onclick="closeEditDishModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <input type="hidden" id="editDishRowIndex" />
+      <div class="form-group mb-3">
+        <label class="form-label" for="editDishName">Dish Name</label>
+        <input class="form-input" id="editDishName" type="text" placeholder="Enter dish name" />
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label" for="editDishPrice">Price (₹)</label>
+        <input class="form-input" id="editDishPrice" type="number" placeholder="Enter price" />
+      </div>
+      <div class="btn-row">
+        <button class="btn btn--primary btn--block btn--lg" onclick="saveAdminDishEdit()">
+          Save Changes
+        </button>
+        <button class="btn btn--ghost btn--block" onclick="closeEditDishModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ ENTRY DETAILS MODAL (MOBILE) ═══════ -->
+<div class="modal-overlay" id="modalEntryDetails">
+  <div class="modal glass-modal">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">🧾</span> Entry Details
+      </div>
+      <button class="modal__close" onclick="closeEntryDetailsModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body" id="modalEntryDetailsBody">
+      <!-- Details dynamically loaded via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ EDIT ENTRY MODAL ═══════ -->
+<div class="modal-overlay" id="modalEditEntry">
+  <div class="modal glass-modal" style="max-width: 460px;">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">✏️</span> Edit Entry
+      </div>
+      <button class="modal__close" onclick="closeEditEntryModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <div class="form-group">
+        <label class="form-label" for="editEntryMobile">Mobile Number</label>
+        <input type="text" class="form-input" id="editEntryMobile" placeholder="10-digit number or blank for walk-in" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="editEntryAmount">Billing Amount (₹)</label>
+        <input type="number" min="0" class="form-input" id="editEntryAmount" oninput="autoDistributeEditAmount()" />
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" style="font-weight: 700; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.25rem;">Payment breakdown (Total must match amount)</label>
+        <div class="form-row-responsive" style="gap: 0.5rem;">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label" for="editEntryCash" style="font-size: 0.8rem;">Cash</label>
+            <input type="number" min="0" class="form-input" id="editEntryCash" placeholder="0" />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label" for="editEntryUpi" style="font-size: 0.8rem;">UPI</label>
+            <input type="number" min="0" class="form-input" id="editEntryUpi" placeholder="0" />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label" for="editEntryCard" style="font-size: 0.8rem;">Card</label>
+            <input type="number" min="0" class="form-input" id="editEntryCard" placeholder="0" />
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="editEntryMessage">Message (Optional)</label>
+        <input type="text" class="form-input" id="editEntryMessage" placeholder="Add note..." />
+      </div>
+      <div class="error-msg" id="errEditEntrySplit" style="display: none; text-align: center; margin-bottom: 0.75rem;">Payment breakdown sum does not match total amount.</div>
+      <button class="btn btn--primary btn--block btn--lg pulse-hover" id="btnSaveEditEntry" onclick="saveEditedEntry()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BLUETOOTH THERMAL PRINTER MODAL ═══════ -->
+<div class="modal-overlay" id="modalPrinterSettings">
+  <div class="modal glass-modal" style="max-width: 400px;">
+    <div class="modal__header">
+      <div class="modal__title">
+        <span class="icon">🖨️</span> Thermal POS Printer
+      </div>
+      <button class="modal__close" onclick="PrinterManager.closePrinterModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <div class="printer-config-group">
+        <div class="printer-config-title">Bluetooth Connection</div>
+        <div id="printerModalStatus" style="font-size: 0.88rem; margin-bottom: 0.75rem;">
+          <span style="color: var(--text-muted);">No printer connected.</span>
+        </div>
+        <button class="btn btn--primary btn--block" id="btnModalPrinterConnect" onclick="PrinterManager.connect()">
+          🔗 Connect Bluetooth Printer
+        </button>
+      </div>
+
+      <div class="printer-config-group">
+        <div class="printer-config-title">Thermal Paper Width</div>
+        <div class="printer-radio-row">
+          <label class="printer-radio-label">
+            <input type="radio" name="paperWidthOpt" id="radioPaper58" value="58mm" checked onchange="PrinterManager.setPaperSize('58mm')" />
+            58mm (32 Cols)
+          </label>
+          <label class="printer-radio-label">
+            <input type="radio" name="paperWidthOpt" id="radioPaper80" value="80mm" onchange="PrinterManager.setPaperSize('80mm')" />
+            80mm (48 Cols)
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        <button class="btn btn--outline btn--block" onclick="PrinterManager.printTestReceipt()" style="font-size: 0.85rem;">
+          🧪 Test Print
+        </button>
+        <button class="btn btn--secondary btn--block" onclick="PrinterManager.closePrinterModal()" style="font-size: 0.85rem;">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Thermal Printing Drivers & Templates -->
+<script src="print/receipt-template.js"></script>
+<script src="print/printer.js"></script>
+<script src="script.js"></script>
+<script>
+  // Add today's date to dashboard
+  document.addEventListener('DOMContentLoaded', () => {
+    const d = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const el = document.getElementById('currentDateBadge');
+    if(el) el.textContent = d.toLocaleDateString('en-IN', options);
+    
+    // Auto-update mobile display in modal when opened
+    const modalDetailsEl = document.getElementById('modalDetails');
+    if (modalDetailsEl) {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          const mobileEl = document.getElementById('posMobile');
+          const profileDisp = document.getElementById('profileMobileDisp');
+          if (mutation.target.classList.contains('open') && mobileEl && mobileEl.value && profileDisp) {
+            profileDisp.textContent = '+91 ' + mobileEl.value;
+          }
+        });
+      });
+      observer.observe(modalDetailsEl, { attributes: true, attributeFilter: ['class'] });
+    }
+  });
+</script>
+<!--  THIRD-PARTY INTEGRATION DOCK  -->
+<div id="integrationDock" class="integration-dock"></div>
+
+<!--  SPLIT INTEGRATION PANE  -->
+<div id="splitIntegration" class="split-integration">
+  <div class="split-divider" id="splitDivider"></div>
+  <div class="split-header">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span id="splitTitle" style="display: none;">Integration</span>
+      <select id="splitIntegrationSelect" onchange="handleSplitSelectChange(this)" style="background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-card); padding: 0.35rem 0.75rem; border-radius: 12px; font-weight: 600; font-family: inherit; font-size: 0.9rem; cursor: pointer; outline: none; box-shadow: var(--shadow-card); transition: all 0.2s;">
+        <!-- Options injected dynamically -->
+      </select>
+    </div>
+    <div class="split-actions" style="display: flex; gap: 0.75rem; align-items: center;">
+      <button class="split-action-btn" id="btnSplitReload" title="Reload" onclick="reloadIntegration()" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      </button>
+      <button class="split-action-btn" id="btnSplitNewTab" title="Open in New Tab" onclick="openIntegrationNewTab()" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </button>
+      <button class="close-btn" onclick="closeIntegration()">&times;</button>
+    </div>
+  </div>
+  <!-- We don't use sandbox to ensure complex dashboards can load their scripts and cross-origin auth properly -->
+  <iframe id="splitIframe" class="split-iframe"></iframe>
+</div>
+
+<!-- 📊 ALL BEST SELLERS MODAL -->
+<div class="modal-overlay hidden" id="modalBestSellersAll">
+  <div class="modal glass-modal" style="max-width: 480px;">
+    <div class="modal__header">
+      <h3 class="modal__title" id="bestSellersAllTitle" style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">Best Sellers</h3>
+      <button class="modal__close" onclick="closeModal('modalBestSellersAll')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body" id="bestSellersAllList" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+</div>
+
+<!--  ADD INTEGRATION MODAL  -->
+<div class="modal-overlay" id="modalAddIntegration">
+  <div class="modal glass-modal slide-up">
+    <div class="modal__header">
+      <h3 class="modal__title">Add Custom Website</h3>
+      <button class="modal__close" onclick="closeModal('modalAddIntegration')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <div class="form-group">
+        <label class="form-label">Website Name</label>
+        <input class="form-input" id="inputIntegrationName" type="text" placeholder="e.g., MagicPin">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Website URL</label>
+        <input class="form-input" id="inputIntegrationUrl" type="url" placeholder="https://www.example.com">
+      </div>
+      <button class="btn btn--primary" id="btnSaveIntegration" onclick="handleAddIntegrationSubmit()" style="width: 100%;">
+        Save Website
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

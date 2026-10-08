@@ -1,0 +1,153 @@
+/* ========================================================
+   Perfect Pizza Point - Thermal POS Printer Styles
+   ======================================================== */
+
+/* Navbar Printer Button */
+.printer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-input);
+  color: var(--text-primary);
+  padding: 0.45rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.printer-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-input-focus);
+  transform: translateY(-1px);
+}
+
+.printer-btn--active {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+/* Status Indicator Dot */
+.printer-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all var(--transition-fast);
+}
+
+.printer-indicator.disconnected {
+  background-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+}
+
+.printer-indicator.connecting {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+  animation: printerPulse 1.2s infinite ease-in-out;
+}
+
+.printer-indicator.connected {
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.printer-indicator.unsupported {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+@keyframes printerPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+}
+
+/* Step 4 Checkout Print Button */
+.btn--print {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn--print:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  filter: brightness(1.08);
+}
+
+.btn--print:active {
+  transform: translateY(0);
+}
+
+/* Printer Settings Modal Options */
+.printer-config-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.printer-config-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.6rem;
+}
+
+.printer-radio-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.printer-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.printer-radio-label input[type="radio"] {
+  accent-color: var(--brand-primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Print Fallback Media Query for Physical Paper */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #thermalPrintContainer, #thermalPrintContainer * {
+    visibility: visible;
+  }
+  #thermalPrintContainer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
